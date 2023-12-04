@@ -4,6 +4,10 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
+import { RoleModule } from './system/role/role.module';
+import { MenuModule } from './system/menu/menu.module';
+import { RolePurviewModule } from './system/role-purview/role-purview.module';
 import envConfig from '../config/env';
 
 @Module({
@@ -31,6 +35,10 @@ import envConfig from '../config/env';
             }),
         }),
         UserModule,
+        AuthModule,
+        RoleModule,
+        MenuModule,
+        RolePurviewModule,
     ],
     controllers: [AppController],
     providers: [AppService],

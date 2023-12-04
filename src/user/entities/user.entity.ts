@@ -28,6 +28,12 @@ export class User {
         length: 100,
         nullable: true,
     })
+    phone: string;
+
+    @Column({
+        length: 100,
+        nullable: true,
+    })
     email: string;
 
     @Column({
@@ -37,7 +43,7 @@ export class User {
     avatar: string;
 
     @Column({
-        default: 2,
+        default: 3,
     })
     role: number;
 
@@ -54,8 +60,8 @@ export class User {
     updateTime: Date;
 
     @BeforeInsert()
-    async onBeforeInsert() {
-        this.password = await Bcrypt.hash(this.password);
+    onBeforeInsert() {
+        this.password = Bcrypt.hash(this.password);
         this.createTime = new Date();
     }
 

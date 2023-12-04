@@ -12,15 +12,22 @@ export class UserService {
     async create(createUserDto: CreateUserDto) {
         // 对用户是否存在的判断
         const { username } = createUserDto;
-        const findUser = await this.userRepository.findOne({ where: { username } });
+        const findUser = await this.userRepository.findOne({ where: [{ username }] });
         if (findUser?.id) {
-            throw new HttpException('用户名已存在', HttpStatus.BAD_REQUEST);
+            throw new HttpException('用户已存在', HttpStatus.BAD_REQUEST);
         }
-        const user = this.userRepository.create(createUserDto);
-        const res = await this.userRepository.save(user);
-        console.log('create user res', res);
-        console.log('----------------------------');
-        return res;
+        try {
+            const user = this.userRepository.create(createUserDto);
+            const res = await this.userRepository.save(user);
+            console.log('create user res', res);
+            console.log('----------------------------');
+            return {
+                message: '创建成功',
+            };
+        } catch (error) {
+            console.log('create user error', error);
+            throw new HttpException('创建失败', HttpStatus.BAD_REQUEST);
+        }
     }
 
     async findAll(query?: { keyword?: string; page?: number; pageSize?: number }) {
@@ -29,7 +36,10 @@ export class UserService {
         if (keyword && keyword.trim() !== '') {
             where = [
                 {
-                    username: Like(`%${keyword}%`),
+                    username: keyword,
+                },
+                {
+                    phone: keyword,
                 },
                 {
                     email: Like(`%${keyword}%`),
@@ -39,7 +49,7 @@ export class UserService {
                 },
             ];
         }
-        const data = await this.userRepository.findAndCount({
+        const data = await this.userRepository.find({
             where,
             order: {
                 createTime: 'DESC',
@@ -49,16 +59,19 @@ export class UserService {
         });
         console.log('find all user res', data);
         console.log('----------------------------');
-        if (!data[0].length) {
+        if (!data.length) {
             throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
         }
         return data;
     }
 
     async findOne(key: string | number) {
-        const data = await this.userRepository.findOne({
-            where: [{ id: key as number }, { username: Like(`%${key}%`) }],
-        });
+        const data = await this.userRepository
+            .createQueryBuilder('user')
+            .where('user.id = :id', { id: key })
+            .orWhere('user.username = :username', { username: key })
+            .orWhere('user.phone = :phone', { phone: key })
+            .getOne();
         console.log('find one user res', data);
         console.log('----------------------------');
         if (!data) {
@@ -74,7 +87,9 @@ export class UserService {
         if (res.affected === 0) {
             throw new HttpException('更新失败', HttpStatus.BAD_REQUEST);
         }
-        return res;
+        return {
+            message: '更新成功',
+        };
     }
 
     async remove(id: string) {
@@ -84,6 +99,8 @@ export class UserService {
         if (res.affected === 0) {
             throw new HttpException('删除失败', HttpStatus.BAD_REQUEST);
         }
-        return res;
+        return {
+            message: '删除成功',
+        };
     }
 }

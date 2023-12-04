@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
 @ApiTags('用户')
@@ -16,21 +17,25 @@ export class UserController {
     }
 
     @Post('findAll')
+    @UseGuards(AuthGuard('jwt'))
     findAll(@Param() params?: Record<string, any>) {
         return this.userService.findAll(params);
     }
 
     @Get(':key')
+    @UseGuards(AuthGuard('jwt'))
     findOne(@Param('key') key: string) {
         return this.userService.findOne(key);
     }
 
     @Patch(':id')
+    @UseGuards(AuthGuard('jwt'))
     update(@Param('id') id: string, @Body('updateData') updateData: UpdateUserDto) {
         return this.userService.update(id, updateData);
     }
 
     @Delete(':id')
+    @UseGuards(AuthGuard('jwt'))
     remove(@Param('id') id: string) {
         return this.userService.remove(id);
     }
