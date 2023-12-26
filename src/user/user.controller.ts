@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -12,8 +12,9 @@ export class UserController {
 
     @Post('create')
     @ApiOperation({ summary: '创建用户' })
-    create(@Body() createUserDto: CreateUserDto) {
-        return this.userService.create(createUserDto);
+    create(@Body() createUserDto: CreateUserDto, @Req() req: any) {
+        const { user = {} } = req;
+        return this.userService.create(createUserDto, user);
     }
 
     @Post('findAll')
@@ -30,8 +31,9 @@ export class UserController {
 
     @Patch(':id')
     @UseGuards(AuthGuard('jwt'))
-    update(@Param('id') id: string, @Body('updateData') updateData: UpdateUserDto) {
-        return this.userService.update(id, updateData);
+    update(@Param('id') id: string, @Body('updateData') updateData: UpdateUserDto, @Req() req: any) {
+        const { user = {} } = req;
+        return this.userService.update(id, updateData, user);
     }
 
     @Delete(':id')

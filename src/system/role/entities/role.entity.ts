@@ -1,46 +1,20 @@
 import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert, BeforeUpdate } from 'typeorm';
-import * as Bcrypt from '../../common/utils/bcrypt';
 
 @Entity()
-export class User {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+export class Role {
+    @PrimaryGeneratedColumn()
+    id: number;
 
     @Column({
         length: 100,
-        unique: true,
     })
-    username: string;
-
-    @Column({
-        length: 100,
-        nullable: true,
-    })
-    nickname: string;
-
-    @Column({
-        length: 100,
-        select: false,
-    })
-    password: string;
+    name: string;
 
     @Column({
         length: 100,
         nullable: true,
     })
-    phone: string;
-
-    @Column({
-        length: 100,
-        nullable: true,
-    })
-    email: string;
-
-    @Column({
-        length: 100,
-        nullable: true,
-    })
-    avatar: string;
+    description: string;
 
     @Column({
         type: 'timestamp',
@@ -78,7 +52,6 @@ export class User {
 
     @BeforeInsert()
     onBeforeInsert() {
-        this.password = Bcrypt.hash(this.password);
         this.createTime = new Date();
     }
 

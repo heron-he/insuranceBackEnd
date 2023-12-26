@@ -1,46 +1,47 @@
 import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert, BeforeUpdate } from 'typeorm';
-import * as Bcrypt from '../../common/utils/bcrypt';
 
 @Entity()
-export class User {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+export class Menu {
+    @PrimaryGeneratedColumn()
+    id: number;
 
     @Column({
-        length: 100,
-        unique: true,
-    })
-    username: string;
-
-    @Column({
-        length: 100,
         nullable: true,
+        comment: '父菜单ID，一级菜单为0',
+        default: 0,
     })
-    nickname: string;
+    parentId: number;
 
     @Column({
-        length: 100,
-        select: false,
+        length: 20,
+        comment: '菜单名称',
     })
-    password: string;
+    name: string;
 
     @Column({
-        length: 100,
+        comment: '类型 01-目录 02-菜单 03-按钮',
+    })
+    type: number;
+
+    @Column({
+        length: 50,
         nullable: true,
+        comment: '菜单图标',
     })
-    phone: string;
+    icon: string;
 
     @Column({
-        length: 100,
+        length: 50,
         nullable: true,
+        comment: '组件',
     })
-    email: string;
+    component: string;
 
     @Column({
-        length: 100,
         nullable: true,
+        comment: '排序规则',
     })
-    avatar: string;
+    orderNum: number;
 
     @Column({
         type: 'timestamp',
@@ -78,7 +79,6 @@ export class User {
 
     @BeforeInsert()
     onBeforeInsert() {
-        this.password = Bcrypt.hash(this.password);
         this.createTime = new Date();
     }
 

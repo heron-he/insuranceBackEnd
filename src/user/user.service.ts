@@ -1,15 +1,21 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository, Like } from 'typeorm';
+import { Like, Repository } from 'typeorm';
+import { UserRoleService } from '../system/user-role/user-role.service';
+import { RoleMenuService } from '../system/role-menu/role-menu.service';
 
 @Injectable()
 export class UserService {
-    constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {}
+    constructor(
+        @InjectRepository(User) private readonly userRepository: Repository<User>,
+        private readonly userRoleService: UserRoleService,
+        private readonly roleMenuService: RoleMenuService,
+    ) {}
 
-    async create(createUserDto: CreateUserDto) {
+    async create(createUserDto: CreateUserDto, user: Record<string, any>) {
         // 对用户是否存在的判断
         const { username } = createUserDto;
         const findUser = await this.userRepository.findOne({ where: [{ username }] });
@@ -17,8 +23,16 @@ export class UserService {
             throw new HttpException('用户已存在', HttpStatus.BAD_REQUEST);
         }
         try {
-            const user = this.userRepository.create(createUserDto);
-            const res = await this.userRepository.save(user);
+            const data = this.userRepository.create({ ...createUserDto, createUser: user?.username });
+            const res = await this.userRepository.save(data);
+            // 保存用户的角色
+            const { roles = [] } = createUserDto;
+            if (roles.length) {
+                for (const role of roles) {
+                    const roleRes = await this.userRoleService.create({ userId: res.id, roleId: role }, { user });
+                    console.log('create userRole res', roleRes);
+                }
+            }
             console.log('create user res', res);
             console.log('----------------------------');
             return {
@@ -80,27 +94,53 @@ export class UserService {
         return data;
     }
 
-    async update(id: string, updateUserDto: UpdateUserDto) {
-        const res = await this.userRepository.update(id, updateUserDto);
+    async update(id: string, updateUserDto: UpdateUserDto, user: Record<string, any>) {
+        const data = await this.userRepository.findOne({ where: { id } });
+        if (!data) {
+            throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
+        }
+        data.nickname = updateUserDto.nickname;
+        data.phone = updateUserDto.phone;
+        data.email = updateUserDto.email;
+        data.avatar = updateUserDto.avatar;
+        data.updateUser = user['username'];
+        const res = await this.userRepository.save(data);
         console.log('update user res', res);
         console.log('----------------------------');
-        if (res.affected === 0) {
-            throw new HttpException('更新失败', HttpStatus.BAD_REQUEST);
-        }
         return {
             message: '更新成功',
         };
     }
 
     async remove(id: string) {
-        const res = await this.userRepository.delete(id);
+        const data = await this.userRepository.findOne({ where: { id } });
+        if (!data) {
+            throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
+        }
+        if (data.deleted) {
+            throw new HttpException('用户已删除', HttpStatus.BAD_REQUEST);
+        }
+        data.deleted = 1;
+        data.deleteTime = new Date();
+        const res = await this.userRepository.save(data);
+        if (res.id) {
+            // 删除用户的角色
+            const userRoleRes = await this.userRoleService.removeByUserId(res.id);
+            console.log('delete userRole res', userRoleRes);
+        }
         console.log('delete user res', res);
         console.log('----------------------------');
-        if (res.affected === 0) {
-            throw new HttpException('删除失败', HttpStatus.BAD_REQUEST);
-        }
         return {
             message: '删除成功',
         };
+    }
+
+    // 查找用户的角色及角色所拥有的权限
+    async findRoleAndPermission(id: string) {
+        const roles = await this.userRoleService.findByUserId(id);
+        if (!roles.length) {
+            return [];
+        }
+        return await this.roleMenuService.findByRoleIds(roles.map((item) => item.roleId));
     }
 }
