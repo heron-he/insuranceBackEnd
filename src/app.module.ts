@@ -3,12 +3,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UserModule } from './user/user.module';
-import { AuthModule } from './auth/auth.module';
-import { RoleModule } from './system/role/role.module';
-import { MenuModule } from './system/menu/menu.module';
-import { UserRoleModule } from './system/user-role/user-role.module';
-import { RoleMenuModule } from './system/role-menu/role-menu.module';
+import { UserModule } from '@/modules/user/user.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { RoleModule } from '@/modules/system/role/role.module';
+import { MenuModule } from '@/modules/system/menu/menu.module';
+import { UserRoleModule } from '@/modules/system/user-role/user-role.module';
+import { RoleMenuModule } from '@/modules/system/role-menu/role-menu.module';
 import envConfig from '../config/env';
 
 @Module({
