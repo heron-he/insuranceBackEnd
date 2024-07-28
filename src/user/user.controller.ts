@@ -11,6 +11,7 @@ export class UserController {
     constructor(private readonly userService: UserService) {}
 
     @Post('create')
+    @UseGuards(AuthGuard('jwt'))
     @ApiOperation({ summary: '创建用户' })
     create(@Body() createUserDto: CreateUserDto, @Req() req: any) {
         const { user = {} } = req;
