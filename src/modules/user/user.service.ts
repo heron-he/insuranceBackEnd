@@ -6,7 +6,7 @@ import { User } from './entities/user.entity';
 import { Like, Repository } from 'typeorm';
 import { UserRoleService } from '../system/user-role/user-role.service';
 import { RoleMenuService } from '../system/role-menu/role-menu.service';
-import { CV } from '@/config/constantValue';
+import { CV } from '@/config/config.constant';
 
 @Injectable()
 export class UserService {
