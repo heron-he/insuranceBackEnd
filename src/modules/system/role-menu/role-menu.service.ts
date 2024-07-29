@@ -4,7 +4,7 @@ import { UpdateRoleMenuDto } from './dto/update-role-menu.dto';
 import { RoleMenu } from './entities/role-menu.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { convertToTree } from '@/common/utils/lodash';
+import { menuConvertToTree } from '@/common/utils/lodash';
 import { MenuService } from '../menu/menu.service';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class RoleMenuService {
     constructor(
         @InjectRepository(RoleMenu) private readonly roleMenuRes: Repository<RoleMenu>,
         private readonly menuService: MenuService,
-    ) {}
+    ) { }
 
     async create(createUserRoleDto: CreateRoleMenuDto, user: Record<string, any>) {
         const existed = await this.roleMenuRes.findOne({
@@ -93,6 +93,6 @@ export class RoleMenuService {
         const menuIds = [...new Set(res.map((item) => item.menuId))];
         // 查找具体的菜单
         const menus = await this.menuService.findByIds(menuIds);
-        return convertToTree(menus, 0) as any[];
+        return menuConvertToTree(menus, 0) as any[];
     }
 }

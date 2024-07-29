@@ -9,7 +9,7 @@ import { IndexMoudles } from './modules/index.module';
 @Module({
     imports: [
         ConfigModule.forRoot({
-            isGlobal: true, // 设置为全局
+            isGlobal: true,
             load: [...Configs]
         }),
         TypeOrmModule.forRootAsync({

@@ -4,11 +4,11 @@ import { UpdateMenuDto } from './dto/update-menu.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Menu } from './entities/menu.entity';
 import { Repository } from 'typeorm';
-import { convertToTree } from '@/common/utils/lodash';
+import { menuConvertToTree } from '@/common/utils/lodash';
 
 @Injectable()
 export class MenuService {
-    constructor(@InjectRepository(Menu) private readonly menuRes: Repository<Menu>) {}
+    constructor(@InjectRepository(Menu) private readonly menuRes: Repository<Menu>) { }
 
     async create(createMenuDto: CreateMenuDto, user: Record<string, any>) {
         const menu = this.menuRes.create({ ...createMenuDto, createUser: user['username'] });
@@ -20,10 +20,13 @@ export class MenuService {
 
     async findAll() {
         const res = await this.menuRes.find({ where: { deleted: 0 } });
+        if (res.length <= 0) {
+            return
+        }
         // 将结果转换为树形结构,使用lodash
-        const tree: any[] = convertToTree(res, 0);
-        console.log('find all menu tree', tree);
+        const tree = menuConvertToTree(res, 0);
         console.log('find all menu res', res);
+        console.log('find all menu tree', tree);
         console.log('----------------------------');
         return tree;
     }

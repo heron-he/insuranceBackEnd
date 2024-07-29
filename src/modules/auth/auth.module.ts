@@ -13,10 +13,11 @@ import { UserModule } from '../user/user.module';
 const jwtModule = JwtModule.registerAsync({
     inject: [ConfigService],
     useFactory(configService: ConfigService) {
+        const jwt = configService.get('jwt')
         return {
-            secret: configService.get('JWT_SECRET', 'heron64.'),
+            secret: jwt.secret,
             signOptions: {
-                expiresIn: configService.get('JWT_EXPIRES_IN', '1d'),
+                expiresIn: jwt.expiresIn,
             },
         };
     },
@@ -28,4 +29,4 @@ const jwtModule = JwtModule.registerAsync({
     controllers: [AuthController],
     providers: [AuthService, LocalStorage, JwtStrategy],
 })
-export class AuthModule {}
+export class AuthModule { }
