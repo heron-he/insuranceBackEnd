@@ -4,6 +4,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { Response } from './common/decorators/response';
 import { HttpFilter } from './common/filters/globalError';
 import { AuthGuardGuard } from './modules/auth/auth.guard.guard';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -23,6 +24,7 @@ async function bootstrap() {
     // 全局错误过滤器
     app.useGlobalFilters(new HttpFilter());
     app.useGlobalGuards(new AuthGuardGuard());
+    app.useGlobalPipes(new ValidationPipe)
 
     await app.listen(9080);
 }
